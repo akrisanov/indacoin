@@ -25,3 +25,6 @@ indacoin-*.tar
 
 # Test coverage report
 coveralls.html
+
+# macOS files
+.DS_Store

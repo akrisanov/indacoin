@@ -31,6 +31,8 @@ defmodule Indacoin.MixProject do
     [
       {:httpoison, "~> 1.3"},
       {:poison, "~> 4.0"},
+      {:earmark, "~> 1.2", only: :dev},
+      {:ex_doc, "~> 0.19.1", only: :dev},
       {:junit_formatter, "~> 2.2", only: :test},
       {:excoveralls, "~> 0.10", only: :test}
     ]
