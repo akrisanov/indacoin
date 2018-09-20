@@ -1,11 +1,10 @@
 # Indacoin
 
-**TODO: Add description**
+An Elixir interface to the Indacoin API.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `indacoin` to your list of dependencies in `mix.exs`:
+Add the package to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -15,7 +14,28 @@ def deps do
 end
 ```
 
+and run
+
+```bash
+$ mix deps.get
+```
+
+## Usage
+
+**TODO: Add description**
+
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/indacoin](https://hexdocs.pm/indacoin).
 
+## Contributing
+
+Contributions to Gixy are always welcome! You can help us in different ways:
+
+* Open an issue with suggestions for improvements and errors you're facing;
+* Fork this repository and submit a pull request;
+* Improve the documentation.
+
+## Copyright
+
+Copyright (C) 2018 Andrey Krisanov. The Package is licensed and distributed under the MIT license.
