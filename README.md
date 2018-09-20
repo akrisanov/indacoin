@@ -1,5 +1,8 @@
 # Indacoin
 
+[![CircleCI](https://circleci.com/gh/akrisanov/indacoin.svg?style=svg)](https://circleci.com/gh/akrisanov/indacoin)
+[![Coverage Status](https://coveralls.io/repos/github/akrisanov/indacoin/badge.svg?branch=master)](https://coveralls.io/github/akrisanov/indacoin?branch=master)
+
 An Elixir interface to the Indacoin API.
 
 ## Installation
