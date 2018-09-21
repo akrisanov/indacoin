@@ -33,7 +33,7 @@ be found at [https://hexdocs.pm/indacoin](https://hexdocs.pm/indacoin).
 
 ## TODO
 
-- [] Request params validation
+- [ ] Request params validation
 
 ## Contributing
 

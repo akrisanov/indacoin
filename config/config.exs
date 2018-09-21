@@ -28,3 +28,8 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
+
+config :junit_formatter,
+  report_file: "junit.xml",
+  report_dir: "/tmp",
+  print_report_file: true
