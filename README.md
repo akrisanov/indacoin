@@ -25,11 +25,15 @@ $ mix deps.get
 
 ## Usage
 
-**TODO: Add description**
+Set your API credentials if you do authenticated requests:
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/indacoin](https://hexdocs.pm/indacoin).
+```elixir
+config :indacoin,
+  partner_name: "YOUR_INDACOIN_PARTNER_NAME",
+  secret_key: "YOUR_INDACOIN_SECRET_KEY"
+```
+
+**TODO: Add description**
 
 ## TODO
 

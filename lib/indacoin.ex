@@ -5,7 +5,27 @@ defmodule Indacoin do
 
   import Indacoin.Helpers
 
-  @indacoin_host "https://indacoin.com/"
+  @api_host "https://indacoin.com/"
+  # TODO:
+  # @partner_name Application.get_env(:indacoin, :partner_name)
+  # @secret_key Application.get_env(:indacoin, :secret_key)
+
+  @doc """
+  Returns a list of all available coins sorted by ticker.
+  """
+  def available_cryptocurrencies() do
+    url = @api_host <> "/api/mobgetcurrencies"
+
+    case do_get_request(url) do
+      {:ok, body} ->
+        body
+        |> Enum.filter(fn res -> res["isActive"] == true end)
+        |> Enum.sort_by(fn res -> {res["short_name"]} end)
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
 
   @doc """
   Generates a link that forwards users directly to the payment form without creating transaction via API.
@@ -52,10 +72,29 @@ defmodule Indacoin do
       user_id
     )a
 
+    # keep only allowed params
+    params = Keyword.take(params, request_fields)
+
     if required_keys_and_values_present?(params, request_fields) do
-      {:ok, @indacoin_host <> "gw/payment_form?" <> URI.encode_query(params)}
+      {:ok, @api_host <> "gw/payment_form?" <> URI.encode_query(params)}
     else
       error_missing_required_request_params(request_fields)
+    end
+  end
+
+  defp do_get_request(url, headers \\ []) do
+    case HTTPoison.get(url, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        case Poison.decode(body) do
+          {:ok, decoded} -> {:ok, decoded}
+          {:error, error} -> {:error, error}
+        end
+
+      {:ok, %HTTPoison.Response{status_code: status_code}} ->
+        {:error, status_code}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 end

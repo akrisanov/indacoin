@@ -28,3 +28,6 @@ coveralls.html
 
 # macOS files
 .DS_Store
+
+# Ignore secrets
+config/dev.secret.exs

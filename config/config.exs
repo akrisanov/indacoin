@@ -19,17 +19,6 @@ use Mix.Config
 # You can also configure a 3rd-party app:
 #
 #     config :logger, level: :info
-#
 
-# It is also possible to import configuration files, relative to this
-# directory. For example, you can emulate configuration per environment
-# by uncommenting the line below and defining dev.exs, test.exs and such.
-# Configuration from the imported file will override the ones defined
-# here (which is why it is important to import them last).
-#
-#     import_config "#{Mix.env()}.exs"
-
-config :junit_formatter,
-  report_file: "junit.xml",
-  report_dir: "/tmp",
-  print_report_file: true
+if Mix.env() == :dev and File.exists?(Path.expand("config/dev.secret.exs")), do: import_config("dev.secret.exs")
+if Mix.env() == :test, do: import_config("test.exs")
