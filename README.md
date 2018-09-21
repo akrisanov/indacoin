@@ -31,6 +31,10 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/indacoin](https://hexdocs.pm/indacoin).
 
+## TODO
+
+- [] Request params validation
+
 ## Contributing
 
 Contributions to Gixy are always welcome! You can help us in different ways:

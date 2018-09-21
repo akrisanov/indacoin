@@ -3,6 +3,8 @@ defmodule Indacoin do
   An Elixir interface to the Indacoin API.
   """
 
+  import Indacoin.Helpers
+
   @indacoin_host "https://indacoin.com/"
 
   @doc """
@@ -10,7 +12,9 @@ defmodule Indacoin do
 
   [Example](https://indacoin.com/gw/payment_form?partner=bitcoinist&cur_from=EURO&cur_to=BCD&amount=100&address=1CGETsHqcQC5xU9y3oh6FMpZE4UPKADy5m&user_id=test%40gmail.com)
 
-  ## Parameters
+  ## params
+
+  Required request params:
 
     - _partner_
       - string
@@ -20,7 +24,6 @@ defmodule Indacoin do
       - Currency code which defines the currency in which customer wish to do the payment;
         used to define price parameter.
       - Possible values: `USD`, `EURO`, `RUB`.
-      - The minimum transaction limit is 50 USD / EUR, the maximum transaction limit is 3000 USD / EUR.
     - _cur_to_
       - string
       - Cryptocurrency code which defines the currency in which customer wish to receive payouts.
@@ -29,6 +32,8 @@ defmodule Indacoin do
     - _amount_
       - double
       - The price set by the customer. Example: 299.99
+      - The minimum transaction limit is `50 USD/EUR`.
+      - The maximum transaction limit is `3000 USD/EUR`.
     - _address_
       - string
       - Wallet address for receiving payouts.
@@ -37,8 +42,8 @@ defmodule Indacoin do
       - Customer custom ID. Using a unique value or email is strongly recommended.
 
   """
-  def forwarding_link(params \\ []) do
-    required_fields = ~w(
+  def forwarding_link(params) do
+    request_fields = ~w(
       partner
       cur_from
       cur_to
@@ -47,23 +52,10 @@ defmodule Indacoin do
       user_id
     )a
 
-    if required_fields |> Enum.all?(&(has_key_and_value?(params, &1))) do
+    if required_keys_and_values_present?(params, request_fields) do
       {:ok, @indacoin_host <> "gw/payment_form?" <> URI.encode_query(params)}
     else
-      {:error, "Following request params must be provided: #{Enum.join(required_fields, ", ")}"}
-    end
-  end
-
-  defp has_key_and_value?(list, key) do
-    if Keyword.has_key?(list, key) do
-      value = Keyword.get(list, key, nil)
-      cond do
-        is_nil(value) -> false
-        is_bitstring(value) -> String.trim(value) |> String.length > 0
-        true -> true
-      end
-    else
-      false
+      error_missing_required_request_params(request_fields)
     end
   end
 end
