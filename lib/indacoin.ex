@@ -5,22 +5,20 @@ defmodule Indacoin do
 
   import Indacoin.Helpers
 
-  @api_host "https://indacoin.com/"
-  # TODO:
-  # @partner_name Application.get_env(:indacoin, :partner_name)
-  # @secret_key Application.get_env(:indacoin, :secret_key)
-
   @doc """
   Returns a list of all available coins sorted by ticker.
   """
-  def available_cryptocurrencies() do
-    url = @api_host <> "/api/mobgetcurrencies"
+  def available_coins() do
+    url = api_host() <> "api/mobgetcurrencies"
 
     case do_get_request(url) do
       {:ok, body} ->
-        body
-        |> Enum.filter(fn res -> res["isActive"] == true end)
-        |> Enum.sort_by(fn res -> {res["short_name"]} end)
+        coins =
+          body
+          |> Enum.filter(fn res -> res["isActive"] == true end)
+          |> Enum.sort_by(fn res -> {res["short_name"]} end)
+
+        {:ok, coins}
 
       {:error, reason} ->
         {:error, reason}
@@ -76,11 +74,14 @@ defmodule Indacoin do
     params = Keyword.take(params, request_fields)
 
     if required_keys_and_values_present?(params, request_fields) do
-      {:ok, @api_host <> "gw/payment_form?" <> URI.encode_query(params)}
+      {:ok, api_host() <> "gw/payment_form?" <> URI.encode_query(params)}
     else
       error_missing_required_request_params(request_fields)
     end
   end
+
+  defp api_host,
+    do: Application.fetch_env!(:indacoin, :api_host)
 
   defp do_get_request(url, headers \\ []) do
     case HTTPoison.get(url, headers) do
