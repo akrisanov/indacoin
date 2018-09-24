@@ -299,6 +299,22 @@ defmodule Indacoin do
     do_signed_request(url, body)
   end
 
+  @doc """
+  Indacoin will send a callback to your application's exposed URL when a customer makes a payment.
+
+  _While testing, you can accept all incoming callbacks, but in production, you'll need
+  to verify the authenticity of incoming requests._
+  """
+  def valid_callback_signature?(indacoin_signature, indacoin_nonce, user_id, tx_id) do
+    message = "#{partner_name()}_#{user_id}_#{indacoin_nonce}_#{tx_id}"
+
+    signature =
+      :crypto.hmac(:sha256, secret(), message)
+      |> Base.encode64()
+
+    signature == indacoin_signature
+  end
+
   defp api_host,
     do: Application.fetch_env!(:indacoin, :api_host)
 
