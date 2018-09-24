@@ -4,6 +4,17 @@ defmodule Indacoin.Helpers do
   """
 
   @doc """
+  Checks if value is not equal to nil or not an empty string.
+  """
+  def not_empty?(value) do
+    cond do
+      is_nil(value) -> false
+      is_bitstring(value) -> String.trim(value) |> String.length() > 0
+      true -> true
+    end
+  end
+
+  @doc """
   Checks if all required keys and values are present in a keyword list.
   """
   def required_keys_and_values_present?(list, keys) do
@@ -15,17 +26,8 @@ defmodule Indacoin.Helpers do
   Checks if key and value are present in a keyword list.
   """
   def has_key_and_value?(list, key) do
-    if Keyword.has_key?(list, key) do
-      value = Keyword.get(list, key, nil)
-
-      cond do
-        is_nil(value) -> false
-        is_bitstring(value) -> String.trim(value) |> String.length() > 0
-        true -> true
-      end
-    else
-      false
-    end
+    Keyword.get(list, key, nil)
+    |> not_empty?
   end
 
   @doc """

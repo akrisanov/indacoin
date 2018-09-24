@@ -47,7 +47,7 @@ defmodule Indacoin do
         Currency conversions are done at Indacoin.
       - [Full list of supported cryptocurrencies](https://indacoin.com/api/mobgetcurrencies)
     - _amount_
-      - double
+      - decimal
       - The price set by the customer. Example: 299.99
       - The minimum transaction limit is `50 USD/EUR`.
       - The maximum transaction limit is `3000 USD/EUR`.
@@ -74,10 +74,14 @@ defmodule Indacoin do
       user_id
     )a
 
-    # keep only allowed params
-    params = Keyword.take(params, request_fields)
+    optional_fields = ~w(
+      partner
+      user_id
+    )a
 
-    if required_keys_and_values_present?(params, request_fields) do
+    params = filter_request_params(params, request_fields)
+
+    if required_keys_and_values_present?(params, request_fields -- optional_fields) do
       {:ok, api_host() <> "gw/payment_form?" <> URI.encode_query(params)}
     else
       error_missing_required_request_params(request_fields)
@@ -101,8 +105,7 @@ defmodule Indacoin do
       user_id
     )a
 
-    # keep only allowed params
-    params = Keyword.take(params, request_fields)
+    params = filter_request_params(params, request_fields)
 
     if required_keys_and_values_present?(params, request_fields -- optional_fields) do
       url =
@@ -118,6 +121,8 @@ defmodule Indacoin do
 
   @doc """
   Drafts payment transaction and returns its ID.
+
+  Authorized request.
 
   [STANDARD INTEGRATION](https://indacoin.com/en_US/api)
 
@@ -142,7 +147,7 @@ defmodule Indacoin do
       - string
       - Wallet address for receiving payouts.
     - _amount_in_
-      - double
+      - decimal
       - The price set by the customer. Example: 299.99
       - The minimum transaction limit is `50 USD/EUR`.
       - The maximum transaction limit is `3000 USD/EUR`.
@@ -156,19 +161,17 @@ defmodule Indacoin do
       amount_in
     )a
 
-    # keep only allowed params
-    params = Keyword.take(params, request_fields)
+    params = filter_request_params(params, request_fields)
 
     if required_keys_and_values_present?(params, request_fields) do
       url = api_host() <> "api/exgw_createTransaction"
-      body = Poison.encode!(Enum.into(params, %{}))
-      signature = construct_signature()
 
-      do_request(:post, url, body, [
-        {:"gw-partner", partner_name()},
-        {:"gw-nonce", signature[:nonce]},
-        {:"gw-sign", signature[:value]}
-      ])
+      body =
+        params
+        |> Enum.into(%{})
+        |> Poison.encode!()
+
+      do_signed_request(url, body)
     else
       error_missing_required_request_params(request_fields)
     end
@@ -178,13 +181,15 @@ defmodule Indacoin do
   Generates a link that forwards a user to the payment form.
   To create the request you need to get transaction ID via `create_transaction/1` method.
 
+  Authorized request.
+
   [Example](https://indacoin.com/gw/payment_form?transaction_id=1154&partner=indacoin&cnfhash=Ny8zcXVWbCs5MVpGRFFXem44NW h5SE9xTitlajkydFpDTXhDOVMrOFdOOD0=)
 
   ## params
 
   Required request params:
 
-    - _transaction_id_:
+    - _transaction_id_
       - integer
   """
   def transaction_link(transaction_id) do
@@ -204,6 +209,96 @@ defmodule Indacoin do
     {:ok, api_host() <> "gw/payment_form?" <> URI.encode_query(params)}
   end
 
+  @doc """
+  Retrieves a list of transactions.
+
+  Authorized request.
+
+  ## Paging Through Results Using Offset and Limit
+
+  - limit=10 -> Returns the first 10 records.
+  - offset=5&limit=5 -> Returns records 6..10.
+  - offset=10 -> Returns records 11..61 (the default number of the returned records is 50).
+
+  ## params
+
+  Optional request_params:
+
+    - _user_id_
+      - string
+    - _tx_id_
+      - string
+    - _status_
+      - NotFound
+      - Chargeback
+      - Declined
+      - Cancelled
+      - Failed
+      - Draft
+      - Paid
+      - Verification
+      - FundsSent
+      - Finished
+    - _created_at_
+      - integer / timestamp
+    - _hash_
+      - string
+    - _cur_in_
+      - string
+    - _cur_out_
+      - string
+    - _amount_in_
+      - decimal
+    - _amount_out_
+      - decimal
+    - _target_address_
+      - string
+    - _limit_
+      - integer
+    - _offset_
+      - integer
+  """
+  def transactions_history(params \\ []) do
+    request_fields = ~w(
+      user_id
+      tx_id
+      status
+      created_at
+      hash
+      cur_in
+      cur_out
+      amount_in
+      amount_out
+      target_address
+      limit
+      offset
+    )a
+
+    url = api_host() <> "api/exgw_getTransactions"
+
+    body =
+      filter_request_params(params, request_fields)
+      |> Enum.into(%{})
+      |> Poison.encode!()
+
+    do_signed_request(url, body)
+  end
+
+  @doc """
+  Retrieves transaction info by its id.
+
+  Authorized request.
+  """
+  def transaction(id) when is_integer(id) do
+    url = api_host() <> "api/exgw_gettransactioninfo"
+
+    body =
+      %{transaction_id: id}
+      |> Poison.encode!()
+
+    do_signed_request(url, body)
+  end
+
   defp api_host,
     do: Application.fetch_env!(:indacoin, :api_host)
 
@@ -212,6 +307,11 @@ defmodule Indacoin do
 
   defp secret,
     do: Application.fetch_env!(:indacoin, :secret_key)
+
+  defp filter_request_params(list, fields) do
+    Keyword.take(list, fields)
+    |> Enum.filter(fn {_, v} -> not_empty?(v) end)
+  end
 
   defp construct_signature() do
     nonce = Enum.random(100_000..1_000000)
@@ -224,6 +324,16 @@ defmodule Indacoin do
     %{nonce: nonce, value: signature}
   end
 
+  defp do_signed_request(url, body) do
+    signature = construct_signature()
+
+    do_request(:post, url, body, [
+      {:"gw-partner", partner_name()},
+      {:"gw-nonce", signature[:nonce]},
+      {:"gw-sign", signature[:value]}
+    ])
+  end
+
   defp do_get_request(url) do
     do_request(:get, url)
   end
@@ -231,7 +341,8 @@ defmodule Indacoin do
   defp do_request(method, url, body \\ "", headers \\ []) do
     headers = Enum.into(headers, [{"Content-Type", "application/json"}])
 
-    case HTTPoison.request(method, url, body, headers) do
+    # NOTE: Indacoin can be really slow... we have to specify big timeout value
+    case HTTPoison.request(method, url, body, headers, recv_timeout: 20000) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         case Poison.decode(body) do
           {:ok, decoded} ->
