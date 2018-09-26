@@ -27,8 +27,7 @@ defmodule IndacoinTest do
     test "returns an error if can't parse JSON response", %{bypass: bypass} do
       Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, "#{@prebacked_payload},"))
 
-      assert {:error, %Poison.ParseError{__exception__: true, rest: nil, pos: 1269, value: ","}} ==
-               Indacoin.available_coins()
+      assert {:error, {:invalid, ",", 1269}} == Indacoin.available_coins()
     end
   end
 
