@@ -206,7 +206,7 @@ defmodule Indacoin do
       cnfhash: signature
     ]
 
-    {:ok, api_host() <> "gw/payment_form?" <> URI.encode_query(params)}
+    api_host() <> "gw/payment_form?" <> URI.encode_query(params)
   end
 
   @doc """
