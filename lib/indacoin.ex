@@ -308,11 +308,7 @@ defmodule Indacoin do
   def valid_callback_signature?(indacoin_signature, indacoin_nonce, user_id, tx_id) do
     message = "#{partner_name()}_#{user_id}_#{indacoin_nonce}_#{tx_id}"
 
-    signature =
-      :crypto.hmac(:sha256, secret(), message)
-      |> Base.encode64()
-
-    signature == indacoin_signature
+    Base.encode64(sign(message)) == indacoin_signature
   end
 
   defp api_host,
@@ -332,12 +328,12 @@ defmodule Indacoin do
   defp construct_signature() do
     nonce = Enum.random(100_000..1_000000)
     message = "#{partner_name()}_#{nonce}"
+    %{nonce: nonce, value: sign(message)}
+  end
 
-    signature =
-      :crypto.hmac(:sha256, secret(), message)
-      |> Base.encode64()
-
-    %{nonce: nonce, value: signature}
+  defp sign(message) do
+    :crypto.hmac(:sha256, secret(), message)
+    |> Base.encode64()
   end
 
   defp do_signed_request(url, body) do
