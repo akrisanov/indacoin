@@ -34,6 +34,8 @@ defmodule Indacoin do
 
   ## params
 
+  Map
+
   Required request params:
 
     - _cur_from_
@@ -65,56 +67,56 @@ defmodule Indacoin do
       - Customer custom ID. Using a unique value or email is strongly recommended.
   """
   def forwarding_link(params) do
-    request_fields = ~w(
-      partner
+    required_params = ~w(
       cur_from
       cur_to
       amount
       address
-      user_id
-    )a
+    )
 
-    optional_fields = ~w(
+    optional_params = ~w(
       partner
       user_id
-    )a
+    )
 
-    params = filter_request_params(params, request_fields)
+    params = take_params(params, required_params ++ optional_params)
 
-    if required_keys_and_values_present?(params, request_fields -- optional_fields) do
+    if required_params_present?(params, required_params) do
       {:ok, api_host() <> "gw/payment_form?" <> URI.encode_query(params)}
     else
-      error_missing_required_request_params(request_fields)
+      missing_required_request_params(required_params)
     end
   end
 
   @doc """
   Gets value of amount that customer will get once payment transaction finished.
   """
-  def transaction_price(params) do
-    request_fields = ~w(
+  def transaction_price(params \\ %{}) do
+    required_params = ~w(
       cur_from
       cur_to
       amount
-      user_id
-    )a
+    )
 
-    optional_fields = ~w(
+    optional_params = ~w(
       partner
       user_id
-    )a
+    )
 
-    params = filter_request_params(params, request_fields)
+    params = take_params(params, required_params ++ optional_params)
 
-    if required_keys_and_values_present?(params, request_fields -- optional_fields) do
-      url =
-        api_host() <>
-          "api/GetCoinConvertAmount/" <>
-          "#{params[:cur_from]}/#{params[:cur_to]}/#{params[:amount]}/#{params[:partner]}/#{params[:user_id]}"
+    if required_params_present?(params, required_params) do
+      query_params =
+        # params order is important for this request!
+        required_params ++ optional_params
+        |> Enum.map(fn k -> Map.get(params, k) end)
+        |> Enum.reject(&is_nil/1)
+        |> Enum.join("/")
 
+      url = api_host() <> "api/GetCoinConvertAmount/" <> query_params
       do_request(:get, url)
     else
-      error_missing_required_request_params(request_fields)
+      missing_required_request_params(required_params)
     end
   end
 
@@ -126,6 +128,8 @@ defmodule Indacoin do
   [STANDARD INTEGRATION](https://indacoin.com/en_US/api)
 
   ## params
+
+  Map
 
   Required request params:
 
@@ -152,27 +156,22 @@ defmodule Indacoin do
       - The maximum transaction limit is `3000 USD/EUR`.
   """
   def create_transaction(params) do
-    request_fields = ~w(
+    required_params = ~w(
       user_id
       cur_in
       cur_out
       target_address
       amount_in
-    )a
+    )
 
-    params = filter_request_params(params, request_fields)
+    params = take_params(params, required_params)
 
-    if required_keys_and_values_present?(params, request_fields) do
+    if required_params_present?(params, required_params) do
       url = api_host() <> "api/exgw_createTransaction"
-
-      body =
-        params
-        |> Enum.into(%{})
-        |> Poison.encode!()
-
+      body = Poison.encode!(params)
       do_signed_request(url, body)
     else
-      error_missing_required_request_params(request_fields)
+      missing_required_request_params(required_params)
     end
   end
 
@@ -221,6 +220,8 @@ defmodule Indacoin do
 
   ## params
 
+  Map
+
   Optional request_params:
 
     - _user_id_
@@ -257,8 +258,8 @@ defmodule Indacoin do
     - _offset_
       - integer
   """
-  def transactions_history(params \\ []) do
-    request_fields = ~w(
+  def transactions_history(params \\ %{}) do
+    optional_params = ~w(
       user_id
       tx_id
       status
@@ -271,13 +272,12 @@ defmodule Indacoin do
       target_address
       limit
       offset
-    )a
+    )
 
     url = api_host() <> "api/exgw_getTransactions"
 
     body =
-      filter_request_params(params, request_fields)
-      |> Enum.into(%{})
+      take_params(params, optional_params)
       |> Poison.encode!()
 
     do_signed_request(url, body)
@@ -322,11 +322,6 @@ defmodule Indacoin do
 
   def secret,
     do: Application.fetch_env!(:indacoin, :secret_key)
-
-  defp filter_request_params(list, fields) do
-    Keyword.take(list, fields)
-    |> Enum.filter(fn {_, v} -> not_empty?(v) end)
-  end
 
   defp construct_signature() do
     nonce = Enum.random(100_000..1_000_000)
@@ -376,5 +371,9 @@ defmodule Indacoin do
       {:error, error} ->
         {:error, error}
     end
+  end
+
+  defp missing_required_request_params(keys) do
+    {:error, "Following request params must be provided: #{Enum.join(keys, ", ")}"}
   end
 end

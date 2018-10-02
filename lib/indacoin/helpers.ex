@@ -1,7 +1,33 @@
 defmodule Indacoin.Helpers do
   @moduledoc """
-  Provides useful helper methods.
+  Provides helper methods for prebaking request params.
   """
+
+  @doc """
+  Checks if all required params (keys and values) are present.
+  """
+  def required_params_present?(map, keys) do
+    keys
+    |> Enum.all?(&has_key_and_value?(map, &1))
+  end
+
+  @doc """
+  Takes only presented params.
+  """
+  def take_params(map, keys) do
+    map
+    |> Map.take(keys)
+    |> Enum.filter(fn {_, v} -> not_empty?(v) end)
+    |> Enum.into(%{})
+  end
+
+  @doc """
+  Checks if param is present.
+  """
+  def has_key_and_value?(map, key) do
+    Map.get(map, key, nil)
+    |> not_empty?
+  end
 
   @doc """
   Checks if value is not equal to nil or not an empty string.
@@ -14,26 +40,7 @@ defmodule Indacoin.Helpers do
     end
   end
 
-  @doc """
-  Checks if all required keys and values are present in a keyword list.
-  """
-  def required_keys_and_values_present?(list, keys) do
-    keys
-    |> Enum.all?(&has_key_and_value?(list, &1))
-  end
-
-  @doc """
-  Checks if key and value are present in a keyword list.
-  """
-  def has_key_and_value?(list, key) do
-    Keyword.get(list, key, nil)
-    |> not_empty?
-  end
-
-  @doc """
-  Returns an error with friendly message.
-  """
-  def error_missing_required_request_params(keys) do
-    {:error, "Following request params must be provided: #{Enum.join(keys, ", ")}"}
+  def to_keyword_list(map) do
+    Enum.map(map, fn({key, value}) -> {String.to_atom(key), value} end)
   end
 end

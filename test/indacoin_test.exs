@@ -38,48 +38,48 @@ defmodule IndacoinTest do
     @price_amount 59.99
     @receive_btc_address "1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1"
     @user_id "test@example.com"
-    @error_message "Following request params must be provided: partner, cur_from, cur_to, amount, address, user_id"
+    @error_message "Following request params must be provided: cur_from, cur_to, amount, address"
 
     test "with required fields returns payment url", %{bypass: bypass} do
       assert {:ok, url} =
-               Indacoin.forwarding_link(
-                 partner: @partner,
-                 cur_from: @price_currency,
-                 cur_to: @receive_currency,
-                 amount: @price_amount,
-                 address: @receive_btc_address,
-                 user_id: @user_id
-               )
+               Indacoin.forwarding_link(%{
+                 "partner" => @partner,
+                 "cur_from" => @price_currency,
+                 "cur_to" => @receive_currency,
+                 "amount" => @price_amount,
+                 "address" => @receive_btc_address,
+                 "user_id" => @user_id
+               })
 
       assert url ==
                "http://localhost:#{bypass.port}/gw/payment_form?" <>
-                 "partner=elixir&cur_from=USD&cur_to=BTC&amount=59.99&" <>
-                 "address=1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1&user_id=test%40example.com"
+                 "address=1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1&" <>
+                 "amount=59.99&cur_from=USD&cur_to=BTC&partner=elixir&user_id=test%40example.com"
     end
 
     test "with empty request params returns an error" do
       assert {:error, desc} =
-               Indacoin.forwarding_link(
-                 partner: "",
-                 cur_from: "",
-                 cur_to: "",
-                 amount: "",
-                 address: "",
-                 user_id: ""
-               )
+               Indacoin.forwarding_link(%{
+                 "partner" => "",
+                 "cur_from" => "",
+                 "cur_to" => "",
+                 "amount" => "",
+                 "address" => "",
+                 "user_id" => ""
+               })
 
       assert desc == @error_message
     end
 
     test "with any missing request param returns an error" do
       assert {:error, desc} =
-               Indacoin.forwarding_link(
-                 partner: @partner,
-                 cur_from: @price_currency,
-                 cur_to: @receive_currency,
-                 amount: @price_amount,
-                 user_id: @user_id
-               )
+               Indacoin.forwarding_link(%{
+                 "partner" => @partner,
+                 "cur_from" => @price_currency,
+                 "cur_to" => @receive_currency,
+                 "amount" => @price_amount,
+                 "user_id" => @user_id
+               })
 
       assert desc == @error_message
     end
