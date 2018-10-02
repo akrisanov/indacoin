@@ -306,9 +306,13 @@ defmodule Indacoin do
   to verify the authenticity of incoming requests._
   """
   def valid_callback_signature?(indacoin_signature, indacoin_nonce, user_id, tx_id) do
-    message = "#{partner_name()}_#{user_id}_#{indacoin_nonce}_#{tx_id}"
+    new_signature =
+      "#{partner_name()}_#{user_id}_#{indacoin_nonce}_#{tx_id}"
+      |> sign()
+      |> Base.encode64()
+      |> to_string()
 
-    Base.encode64(sign(message)) == indacoin_signature
+    new_signature == to_string(indacoin_signature)
   end
 
   defp api_host,
