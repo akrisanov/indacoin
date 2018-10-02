@@ -96,7 +96,6 @@ defmodule Indacoin do
       cur_from
       cur_to
       amount
-      partner
       user_id
     )a
 
@@ -315,13 +314,13 @@ defmodule Indacoin do
     new_signature == to_string(indacoin_signature)
   end
 
-  defp api_host,
+  def api_host,
     do: Application.fetch_env!(:indacoin, :api_host)
 
-  defp partner_name,
+  def partner_name,
     do: Application.fetch_env!(:indacoin, :partner_name)
 
-  defp secret,
+  def secret,
     do: Application.fetch_env!(:indacoin, :secret_key)
 
   defp filter_request_params(list, fields) do
@@ -330,7 +329,7 @@ defmodule Indacoin do
   end
 
   defp construct_signature() do
-    nonce = Enum.random(100_000..1_000000)
+    nonce = Enum.random(100_000..1_000_000)
     message = "#{partner_name()}_#{nonce}"
     %{nonce: nonce, value: sign(message)}
   end
@@ -358,7 +357,7 @@ defmodule Indacoin do
     headers = Enum.into(headers, [{"Content-Type", "application/json"}])
 
     # NOTE: Indacoin can be really slow... we have to specify big timeout value
-    case HTTPoison.request(method, url, body, headers, recv_timeout: 20000) do
+    case HTTPoison.request(method, url, body, headers, recv_timeout: 20_000) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         case Poison.decode(body) do
           {:ok, decoded} ->
