@@ -41,6 +41,6 @@ defmodule Indacoin.Helpers do
   end
 
   def to_keyword_list(map) do
-    Enum.map(map, fn({key, value}) -> {String.to_atom(key), value} end)
+    Enum.map(map, fn {key, value} -> {String.to_atom(key), value} end)
   end
 end

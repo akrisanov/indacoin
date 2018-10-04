@@ -41,7 +41,7 @@ defmodule Indacoin.MixProject do
   defp deps do
     [
       {:httpoison, "~> 1.3"},
-      {:poison, "~> 2.2 or ~> 3.0"},
+      {:jason, "~> 1.1"},
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19.1", only: :dev},
       {:bypass, "~> 0.8", only: :test},

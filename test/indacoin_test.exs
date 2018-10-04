@@ -12,7 +12,7 @@ defmodule IndacoinTest do
 
   describe "available_coins/0" do
     @prebacked_response [coin_fixture(), coin_fixture()]
-    @prebacked_payload Poison.encode!(indacoin_active_and_disabled_coins_fixture())
+    @prebacked_payload Jason.encode!(indacoin_active_and_disabled_coins_fixture())
 
     test "retrive a list of all available coins", %{bypass: bypass} do
       Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, @prebacked_payload))
@@ -26,8 +26,8 @@ defmodule IndacoinTest do
 
     test "returns an error if can't parse JSON response", %{bypass: bypass} do
       Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, "#{@prebacked_payload},"))
-
-      assert {:error, {:invalid, ",", 1269}} == Indacoin.available_coins()
+      {:error, error} = Indacoin.available_coins()
+      assert error.__struct__ == Jason.DecodeError
     end
   end
 

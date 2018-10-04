@@ -106,9 +106,9 @@ defmodule Indacoin do
     params = take_params(params, required_params ++ optional_params)
 
     if required_params_present?(params, required_params) do
+      # params order is important for this request!
       query_params =
-        # params order is important for this request!
-        required_params ++ optional_params
+        (required_params ++ optional_params)
         |> Enum.map(fn k -> Map.get(params, k) end)
         |> Enum.reject(&is_nil/1)
         |> Enum.join("/")
@@ -168,7 +168,7 @@ defmodule Indacoin do
 
     if required_params_present?(params, required_params) do
       url = api_host() <> "api/exgw_createTransaction"
-      body = Poison.encode!(params)
+      body = Jason.encode!(params)
       do_signed_request(url, body)
     else
       missing_required_request_params(required_params)
@@ -278,7 +278,7 @@ defmodule Indacoin do
 
     body =
       take_params(params, optional_params)
-      |> Poison.encode!()
+      |> Jason.encode!()
 
     do_signed_request(url, body)
   end
@@ -293,7 +293,7 @@ defmodule Indacoin do
 
     body =
       %{transaction_id: id}
-      |> Poison.encode!()
+      |> Jason.encode!()
 
     do_signed_request(url, body)
   end
@@ -354,7 +354,7 @@ defmodule Indacoin do
     # NOTE: Indacoin can be really slow... we have to specify big timeout value
     case HTTPoison.request(method, url, body, headers, recv_timeout: 20_000) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        case Poison.decode(body) do
+        case Jason.decode(body) do
           {:ok, decoded} ->
             cond do
               is_bitstring(decoded) -> {:error, decoded}
