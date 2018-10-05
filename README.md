@@ -20,7 +20,7 @@ end
 and run
 
 ```bash
-$ mix deps.get
+mix deps.get
 ```
 
 ## Usage
@@ -32,12 +32,6 @@ config :indacoin,
   partner_name: "YOUR_INDACOIN_PARTNER_NAME",
   secret_key: "YOUR_INDACOIN_SECRET_KEY"
 ```
-
-**TODO: Add description**
-
-## TODO
-
-- [ ] Request params validation
 
 ## Contributing
 

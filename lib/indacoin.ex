@@ -1,6 +1,37 @@
 defmodule Indacoin do
   @moduledoc """
   An Elixir interface to the Indacoin API.
+
+  ## List Of Requests Params
+
+  - _cur_from_ :: string – Currency code which defines the currency in which customer wish to do the payment;
+    used to define price parameter. Possible values: `USD`, `EURO`, `RUB`.
+  - _cur_in_ :: string ^^^
+  - _cur_to_ :: string – Cryptocurrency code which defines the currency in which customer wish to receive payouts.
+    Currency conversions are done at Indacoin.
+    [Full list of supported cryptocurrencies](https://indacoin.com/api/mobgetcurrencies)
+  - _cur_out_ :: string ^^^
+  - _amount_ :: decimal – The price set by the customer. Example: `299.99`
+    The minimum transaction limit is `50 USD/EUR`.
+    The maximum transaction limit is `3000 USD/EUR`.
+  - _amount_in_ :: decimal ^^^
+  - _address_ :: string – Wallet address for receiving payouts.
+  - _target_address_ :: string ^^^
+  - _partner_ :: string – Indacoin Affiliate Program member.
+  - _user_id_ :: string – Customer custom ID. Using a unique value or email is strongly recommended.
+
+  ## Transaction Statuses
+
+  - NotFound
+  - Chargeback
+  - Declined
+  - Cancelled
+  - Failed
+  - Draft
+  - Paid
+  - Verification
+  - FundsSent
+  - Finished
   """
 
   import Indacoin.Helpers
@@ -30,41 +61,21 @@ defmodule Indacoin do
 
   [Example](https://indacoin.com/gw/payment_form?partner=bitcoinist&cur_from=EURO&cur_to=BCD&amount=100&address=1CGETsHqcQC5xU9y3oh6FMpZE4UPKADy5m&user_id=test%40gmail.com)
 
-  [LIGHT INTEGRATION](https://indacoin.com/en_US/api)
+  ["LIGHT INTEGRATION"](https://indacoin.com/en_US/api)
 
   ## params
 
-  Map
-
   Required request params:
 
-    - _cur_from_
-      - string
-      - Currency code which defines the currency in which customer wish to do the payment;
-        used to define price parameter.
-      - Possible values: `USD`, `EURO`, `RUB`.
-    - _cur_to_
-      - string
-      - Cryptocurrency code which defines the currency in which customer wish to receive payouts.
-        Currency conversions are done at Indacoin.
-      - [Full list of supported cryptocurrencies](https://indacoin.com/api/mobgetcurrencies)
-    - _amount_
-      - decimal
-      - The price set by the customer. Example: 299.99
-      - The minimum transaction limit is `50 USD/EUR`.
-      - The maximum transaction limit is `3000 USD/EUR`.
-    - _address_
-      - string
-      - Wallet address for receiving payouts.
+    - _cur_from_ :: string
+    - _cur_to_ :: string
+    - _amount_ :: decimal
+    - _address_ :: string
 
   Optional request params:
 
-    - _partner_
-      - string
-      - Indacoin Affiliate Program member.
-    - _user_id_
-      - string
-      - Customer custom ID. Using a unique value or email is strongly recommended.
+    - _partner_ :: string
+    - _user_id_ :: string
   """
   def forwarding_link(params) do
     required_params = ~w(
@@ -90,6 +101,19 @@ defmodule Indacoin do
 
   @doc """
   Gets value of amount that customer will get once payment transaction finished.
+
+  ## params
+
+  Required request params:
+
+    - _cur_from_ :: string
+    - _cur_to_ :: string
+    - _amount_ :: decimal
+
+  Optional request params:
+
+    - _partner_ :: string
+    - _user_id_ :: string
   """
   def transaction_price(params \\ %{}) do
     required_params = ~w(
@@ -123,37 +147,19 @@ defmodule Indacoin do
   @doc """
   Drafts payment transaction and returns its ID.
 
-  Authorized request.
+  _Signed API request._
 
-  [STANDARD INTEGRATION](https://indacoin.com/en_US/api)
+  ["STANDARD INTEGRATION"](https://indacoin.com/en_US/api)
 
   ## params
 
-  Map
-
   Required request params:
 
-    - _user_id_
-      - string
-      - Customer custom ID. Using a unique value or email is strongly recommended.
-    - _cur_in_
-      - string
-      - Currency code which defines the currency in which customer wish to do the payment;
-        used to define price parameter.
-      - Possible values: `USD`, `EURO`, `RUB`.
-    - _cur_out_
-      - string
-      - Cryptocurrency code which defines the currency in which customer wish to receive payouts.
-        Currency conversions are done at Indacoin.
-      - [Full list of supported cryptocurrencies](https://indacoin.com/api/mobgetcurrencies)
-    - _target_address_
-      - string
-      - Wallet address for receiving payouts.
-    - _amount_in_
-      - decimal
-      - The price set by the customer. Example: 299.99
-      - The minimum transaction limit is `50 USD/EUR`.
-      - The maximum transaction limit is `3000 USD/EUR`.
+    - _user_id_ :: string
+    - _cur_in_ :: string
+    - _cur_out_ :: string
+    - _target_address_ :: string
+    - _amount_in_ :: decimal
   """
   def create_transaction(params) do
     required_params = ~w(
@@ -179,7 +185,7 @@ defmodule Indacoin do
   Generates a link that forwards a user to the payment form.
   To create the request you need to get transaction ID via `create_transaction/1` method.
 
-  Authorized request.
+  _Signed API request._
 
   [Example](https://indacoin.com/gw/payment_form?transaction_id=1154&partner=indacoin&cnfhash=Ny8zcXVWbCs5MVpGRFFXem44NW h5SE9xTitlajkydFpDTXhDOVMrOFdOOD0=)
 
@@ -187,8 +193,7 @@ defmodule Indacoin do
 
   Required request params:
 
-    - _transaction_id_
-      - integer
+    - _transaction_id_ :: integer
   """
   def transaction_link(transaction_id) do
     message = "#{partner_name()}_#{transaction_id}"
@@ -210,53 +215,30 @@ defmodule Indacoin do
   @doc """
   Retrieves a list of transactions.
 
-  Authorized request.
+  _Signed API request._
 
   ## Paging Through Results Using Offset and Limit
 
-  - limit=10 -> Returns the first 10 records.
-  - offset=5&limit=5 -> Returns records 6..10.
-  - offset=10 -> Returns records 11..61 (the default number of the returned records is 50).
+  - `limit=10` -> Returns the first 10 records.
+  - `offset=5&limit=5` -> Returns records 6..10.
+  - `offset=10` -> Returns records 11..61 (the default number of the returned records is 50).
 
   ## params
 
-  Map
+  All params are optional:
 
-  Optional request_params:
-
-    - _user_id_
-      - string
-    - _tx_id_
-      - string
-    - _status_
-      - NotFound
-      - Chargeback
-      - Declined
-      - Cancelled
-      - Failed
-      - Draft
-      - Paid
-      - Verification
-      - FundsSent
-      - Finished
-    - _created_at_
-      - integer / timestamp
-    - _hash_
-      - string
-    - _cur_in_
-      - string
-    - _cur_out_
-      - string
-    - _amount_in_
-      - decimal
-    - _amount_out_
-      - decimal
-    - _target_address_
-      - string
-    - _limit_
-      - integer
-    - _offset_
-      - integer
+    - _user_id_ :: string
+    - _tx_id_ :: string
+    - _status_ :: string
+    - _created_at_ :: integer / timestamp
+    - _hash_ :: string
+    - _cur_in_ :: string
+    - _cur_out_ :: string
+    - _amount_in_ :: decimal
+    - _amount_out_ :: decimal
+    - _target_address_ :: string
+    - _limit_ :: integer
+    - _offset_ :: integer
   """
   def transactions_history(params \\ %{}) do
     optional_params = ~w(
@@ -286,7 +268,7 @@ defmodule Indacoin do
   @doc """
   Retrieves transaction info by its id.
 
-  Authorized request.
+  _Signed API request._
   """
   def transaction(id) when is_integer(id) do
     url = api_host() <> "api/exgw_gettransactioninfo"
@@ -303,6 +285,15 @@ defmodule Indacoin do
 
   _While testing, you can accept all incoming callbacks, but in production, you'll need
   to verify the authenticity of incoming requests._
+
+  ## params
+
+  Required request params:
+
+    - _indacoin_signature_ :: string
+    - _indacoin_nonce_ :: integer
+    - _user_id_ :: string
+    - _tx_id_ :: integer
   """
   def valid_callback_signature?(indacoin_signature, indacoin_nonce, user_id, tx_id) do
     new_signature =
@@ -314,12 +305,21 @@ defmodule Indacoin do
     new_signature == to_string(indacoin_signature)
   end
 
+  @doc """
+  Fetches Indacoin API host from the application config.
+  """
   def api_host,
     do: Application.fetch_env!(:indacoin, :api_host)
 
+  @doc """
+  Fetches Indacoin API key (the partner name) from the application config.
+  """
   def partner_name,
     do: Application.fetch_env!(:indacoin, :partner_name)
 
+  @doc """
+  Fetches Indacoin API secret key from the application config.
+  """
   def secret,
     do: Application.fetch_env!(:indacoin, :secret_key)
 
@@ -348,11 +348,11 @@ defmodule Indacoin do
     do_request(:get, url)
   end
 
-  defp do_request(method, url, body \\ "", headers \\ []) do
+  # NOTE: Indacoin can be really slow... we have to specify big timeout value
+  defp do_request(method, url, body \\ "", headers \\ [], recv_timeout \\ 20_000) do
     headers = Enum.into(headers, [{"Content-Type", "application/json"}])
 
-    # NOTE: Indacoin can be really slow... we have to specify big timeout value
-    case HTTPoison.request(method, url, body, headers, recv_timeout: 20_000) do
+    case HTTPoison.request(method, url, body, headers, recv_timeout: recv_timeout) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         case Jason.decode(body) do
           {:ok, decoded} ->
