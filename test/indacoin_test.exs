@@ -7,7 +7,51 @@ defmodule IndacoinTest do
   setup do
     bypass = Bypass.open()
     Application.put_env(:indacoin, :api_host, "http://localhost:#{bypass.port}/")
+    Application.put_env(:indacoin, :partner_name, "partner")
+    Application.put_env(:indacoin, :secret_key, "secret")
     {:ok, bypass: bypass}
+  end
+
+  describe "api_host/0" do
+    test "returns API host when application environment has its value", %{bypass: bypass} do
+      assert "http://localhost:#{bypass.port}/" == Indacoin.api_host()
+    end
+
+    test "raises an exception when application environment doesn't include API host value" do
+      Application.delete_env(:indacoin, :api_host)
+
+      assert_raise ArgumentError, fn ->
+        Indacoin.api_host()
+      end
+    end
+  end
+
+  describe "partner_name/0" do
+    test "returns Indacoin API key (a partner name) when application environment has its value" do
+      assert "partner" == Indacoin.partner_name()
+    end
+
+    test "raises an exception when application environment doesn't include API host value" do
+      Application.delete_env(:indacoin, :partner_name)
+
+      assert_raise ArgumentError, fn ->
+        Indacoin.partner_name()
+      end
+    end
+  end
+
+  describe "secret_key/0" do
+    test "returns Indacoin API secret key when application environment has its value" do
+      assert "secret" == Indacoin.secret_key()
+    end
+
+    test "raises an exception when application environment doesn't include API host value" do
+      Application.delete_env(:indacoin, :secret_key)
+
+      assert_raise ArgumentError, fn ->
+        Indacoin.secret_key()
+      end
+    end
   end
 
   describe "available_coins/0" do

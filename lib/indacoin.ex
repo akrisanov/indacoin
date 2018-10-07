@@ -208,7 +208,7 @@ defmodule Indacoin do
     message = "#{partner_name()}_#{transaction_id}"
 
     signature =
-      :crypto.hmac(:sha256, secret(), message)
+      :crypto.hmac(:sha256, secret_key(), message)
       |> Base.encode64()
       |> Base.encode64()
 
@@ -321,7 +321,7 @@ defmodule Indacoin do
     do: Application.fetch_env!(:indacoin, :api_host)
 
   @doc """
-  Fetches Indacoin API key (the partner name) from the application config.
+  Fetches Indacoin API key (a partner name) from the application config.
   """
   def partner_name,
     do: Application.fetch_env!(:indacoin, :partner_name)
@@ -329,7 +329,7 @@ defmodule Indacoin do
   @doc """
   Fetches Indacoin API secret key from the application config.
   """
-  def secret,
+  def secret_key,
     do: Application.fetch_env!(:indacoin, :secret_key)
 
   defp construct_signature() do
@@ -339,7 +339,7 @@ defmodule Indacoin do
   end
 
   defp sign(message) do
-    :crypto.hmac(:sha256, secret(), message)
+    :crypto.hmac(:sha256, secret_key(), message)
     |> Base.encode64()
   end
 
