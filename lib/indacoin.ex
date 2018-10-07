@@ -116,6 +116,16 @@ defmodule Indacoin do
     - _user_id_ :: string
   """
   def transaction_price(params \\ %{}) do
+    case transaction_price_request_url(params) do
+      {:ok, url} -> do_request(:get, url)
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  @doc """
+  false
+  """
+  def transaction_price_request_url(params \\ %{}) do
     required_params = ~w(
       cur_from
       cur_to
@@ -137,8 +147,7 @@ defmodule Indacoin do
         |> Enum.reject(&is_nil/1)
         |> Enum.join("/")
 
-      url = api_host() <> "api/GetCoinConvertAmount/" <> query_params
-      do_request(:get, url)
+      {:ok, api_host() <> "api/GetCoinConvertAmount/" <> query_params}
     else
       missing_required_request_params(required_params)
     end

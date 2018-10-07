@@ -86,4 +86,15 @@ defmodule IndacoinFixtures do
       "user_id" => ""
     }
   end
+
+  def transaction_price_fixture(attrs \\ %{}) do
+    attrs
+    |> Enum.into(%{
+      "cur_from" => "USD",
+      "cur_to" => "BTC",
+      "amount" => 50.0,
+      "partner" => "elixir",
+      "user_id" => "test@example.com"
+    })
+  end
 end
