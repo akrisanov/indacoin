@@ -59,8 +59,7 @@ defmodule IndacoinTest do
 
       assert url ==
                "http://localhost:#{bypass.port}/gw/payment_form?" <>
-                 "address=1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1&" <>
-                 "amount=59.99&cur_from=USD&cur_to=BTC"
+                 "address=1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1&" <> "amount=59.99&cur_from=USD&cur_to=BTC"
     end
   end
 end
