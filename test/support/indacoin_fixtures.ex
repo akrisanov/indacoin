@@ -98,7 +98,7 @@ defmodule IndacoinFixtures do
     })
   end
 
-  def transaction_fixture(attrs \\ %{}) do
+  def transaction_creation_fixture(attrs \\ %{}) do
     attrs
     |> Enum.into(%{
       "user_id" => "test@example.com",
@@ -107,5 +107,30 @@ defmodule IndacoinFixtures do
       "target_address" => "1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1",
       "amount_in" => 50.0
     })
+  end
+
+  def transaction_fixture() do
+    %{
+      "altCurrencyName" => "",
+      "amountIn" => 50.0,
+      "amountOut" => 0.006148,
+      "blockchainHash" => "",
+      "confirmedAt" => "0001-01-01T00:00:00",
+      "couponCode" => "",
+      "createdAt" => "2018-10-03T16:01:49.56",
+      "curIn" => "USD",
+      "curOut" => "BTC",
+      "extraStatus" => "WaitingForCashin",
+      "extra_info" => %{},
+      "finishedAt" => "0001-01-01T00:00:00",
+      "link" => "/notify.aspx?confirm_code=&request_id=-1",
+      "realAmountOut" => 0.0,
+      "reason" => "",
+      "requestId" => -1,
+      "status" => "Draft",
+      "targetAddress" => "{\"btcAddress\":\"1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1\"}",
+      "transactionId" => 123_456,
+      "userId" => "test@example.com"
+    }
   end
 end

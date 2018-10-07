@@ -153,11 +153,11 @@ defmodule IndacoinTest do
   end
 
   describe "transaction_price/1" do
-    test "with valid params returns a transaction price", %{bypass: bypass} do
-      prebacked_response = 0.00559900
+    @prebacked_response 0.00559900
 
-      Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, "#{prebacked_response}"))
-      assert {:ok, prebacked_response} == Indacoin.transaction_price(transaction_price_fixture())
+    test "with valid params returns a transaction price", %{bypass: bypass} do
+      Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, "#{@prebacked_response}"))
+      assert {:ok, @prebacked_response} == Indacoin.transaction_price(transaction_price_fixture())
     end
   end
 
@@ -166,13 +166,13 @@ defmodule IndacoinTest do
       prebacked_response = 12345
 
       Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, "#{prebacked_response}"))
-      assert {:ok, prebacked_response} == Indacoin.create_transaction(transaction_fixture())
+      assert {:ok, prebacked_response} == Indacoin.create_transaction(transaction_creation_fixture())
     end
 
     test "with any missing request param returns an error" do
       error_message = "Following request params must be provided: user_id, cur_in, cur_out, target_address, amount_in"
 
-      assert {:error, message} = Indacoin.create_transaction(transaction_fixture(%{"cur_out" => ""}))
+      assert {:error, message} = Indacoin.create_transaction(transaction_creation_fixture(%{"cur_out" => ""}))
 
       assert message == error_message
     end
@@ -185,6 +185,26 @@ defmodule IndacoinTest do
           "cnfhash=MTViTXZ3d1UybXNTRkNDdWpxTHE3NFJLSmk2dE1vOEllRjIvNCtZTmxuWT0%3D"
 
       assert url == Indacoin.transaction_link(12345)
+    end
+  end
+
+  describe "transactions_history/1" do
+    @prebacked_payload Jason.encode!([transaction_fixture()])
+    @prebacked_response [transaction_fixture()]
+
+    test "returns a list of Indacoin API partner's transactions", %{bypass: bypass} do
+      Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, @prebacked_payload))
+      assert {:ok, @prebacked_response} == Indacoin.transactions_history(%{"user_id" => "test@example.com"})
+    end
+  end
+
+  describe "transaction/1" do
+    @prebacked_payload Jason.encode!(transaction_fixture())
+    @prebacked_response transaction_fixture()
+
+    test "returns transaction info by its id", %{bypass: bypass} do
+      Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, @prebacked_payload))
+      assert {:ok, @prebacked_response} == Indacoin.transaction(123_456)
     end
   end
 end

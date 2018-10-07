@@ -6,17 +6,17 @@ defmodule Indacoin do
 
   - _cur_from_ :: string – Currency code which defines the currency in which customer wish to do the payment;
     used to define price parameter. Possible values: `USD`, `EURO`, `RUB`.
-  - _cur_in_ :: string ^^^
+  - _cur_in_ :: string `^^^`
   - _cur_to_ :: string – Cryptocurrency code which defines the currency in which customer wish to receive payouts.
     Currency conversions are done at Indacoin.
     [Full list of supported cryptocurrencies](https://indacoin.com/api/mobgetcurrencies)
-  - _cur_out_ :: string ^^^
+  - _cur_out_ :: string `^^^`
   - _amount_ :: decimal – The price set by the customer. Example: `299.99`
     The minimum transaction limit is `50 USD/EUR`.
     The maximum transaction limit is `3000 USD/EUR`.
-  - _amount_in_ :: decimal ^^^
+  - _amount_in_ :: decimal `^^^`
   - _address_ :: string – Wallet address for receiving payouts.
-  - _target_address_ :: string ^^^
+  - _target_address_ :: string `^^^`
   - _partner_ :: string – Indacoin Affiliate Program member.
   - _user_id_ :: string – Customer custom ID. Using a unique value or email is strongly recommended.
 
