@@ -12,7 +12,7 @@ Add the package to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:indacoin, "~> 0.1.0"}
+    {:indacoin, "~> 1.0.0"}
   ]
 end
 ```

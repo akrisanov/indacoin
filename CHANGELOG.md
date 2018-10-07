@@ -1,5 +1,5 @@
 # CHANGELOG
 
-## v 0.1.0 (Sep 25, 2018)
+## v 1.0.0 (Oct 07, 2018)
 
 Initial Release
