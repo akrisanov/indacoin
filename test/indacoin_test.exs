@@ -13,11 +13,11 @@ defmodule IndacoinTest do
   end
 
   describe "api_host/0" do
-    test "returns API host when application environment has its value", %{bypass: bypass} do
+    test "returns API host when an application environment has its value", %{bypass: bypass} do
       assert "http://localhost:#{bypass.port}/" == Indacoin.api_host()
     end
 
-    test "raises an exception when application environment doesn't include API host value" do
+    test "raises an exception when an application environment doesn't include API host value" do
       Application.delete_env(:indacoin, :api_host)
 
       assert_raise ArgumentError, fn ->
@@ -27,11 +27,11 @@ defmodule IndacoinTest do
   end
 
   describe "partner_name/0" do
-    test "returns Indacoin API key (a partner name) when application environment has its value" do
+    test "returns Indacoin API key (a partner name) when an application environment has its value" do
       assert "partner" == Indacoin.partner_name()
     end
 
-    test "raises an exception when application environment doesn't include API host value" do
+    test "raises an exception when an application environment doesn't include API host value" do
       Application.delete_env(:indacoin, :partner_name)
 
       assert_raise ArgumentError, fn ->
@@ -41,11 +41,11 @@ defmodule IndacoinTest do
   end
 
   describe "secret_key/0" do
-    test "returns Indacoin API secret key when application environment has its value" do
+    test "returns Indacoin API secret key when an application environment has its value" do
       assert "secret" == Indacoin.secret_key()
     end
 
-    test "raises an exception when application environment doesn't include API host value" do
+    test "raises an exception when an application environment doesn't include API host value" do
       Application.delete_env(:indacoin, :secret_key)
 
       assert_raise ArgumentError, fn ->
@@ -54,8 +54,30 @@ defmodule IndacoinTest do
     end
   end
 
+  describe "construct_signature/1" do
+    test "returns API request signature along with the nonce" do
+      assert %{nonce: 0, value: "qgH4bbykF3g3K/hkZCZJP/NjuGlr+gigbX6wz1BsYq8="} == Indacoin.construct_signature(0)
+    end
+  end
+
+  describe "valid_callback_signature?/4" do
+    @indacoin_signature "dTh2ZDhYb2xMYW5iMEltU2VkYkg4NlRCVTF1bjdUaExUUGRVd3pYMFA5RT0="
+    @user_id "test@example.com"
+    @transaction_id 123_456
+
+    test "returns true when client signature is equal to indacoin signature" do
+      indacoin_nonce = 78_901
+      assert true == Indacoin.valid_callback_signature?(@indacoin_signature, indacoin_nonce, @user_id, @transaction_id)
+    end
+
+    test "returns false when client signature is not equal to indacoin signature" do
+      indacoin_nonce = 1_234
+      assert false == Indacoin.valid_callback_signature?(@indacoin_signature, indacoin_nonce, @user_id, @transaction_id)
+    end
+  end
+
   describe "available_coins/0" do
-    @prebacked_payload Jason.encode!(indacoin_active_and_disabled_coins_fixture())
+    @prebacked_payload Jason.encode!(active_and_disabled_coins_fixture())
     @prebacked_response [bch_fixture(), eth_fixture()]
 
     test "retrive a list of all available coins sorted by name", %{bypass: bypass} do
@@ -79,14 +101,14 @@ defmodule IndacoinTest do
     @error_message "Following request params must be provided: cur_from, cur_to, amount, address"
 
     test "with empty request params returns an error" do
-      assert {:error, desc} = Indacoin.forwarding_link(forwarding_link_empty_fixture())
-      assert desc == @error_message
+      assert {:error, message} = Indacoin.forwarding_link(forwarding_link_empty_fixture())
+      assert message == @error_message
     end
 
     test "with any missing request param returns an error" do
-      assert {:error, desc} = Indacoin.forwarding_link(forwarding_link_valid_fixture(%{"cur_from" => ""}))
+      assert {:error, message} = Indacoin.forwarding_link(forwarding_link_valid_fixture(%{"cur_from" => ""}))
 
-      assert desc == @error_message
+      assert message == @error_message
     end
 
     test "with all valid params returns a full payment url", %{bypass: bypass} do
@@ -124,9 +146,9 @@ defmodule IndacoinTest do
     test "with any missing request param returns an error" do
       error_message = "Following request params must be provided: cur_from, cur_to, amount"
 
-      assert {:error, desc} = Indacoin.transaction_price_request_url(transaction_price_fixture(%{"cur_from" => ""}))
+      assert {:error, message} = Indacoin.transaction_price_request_url(transaction_price_fixture(%{"cur_from" => ""}))
 
-      assert desc == error_message
+      assert message == error_message
     end
   end
 
@@ -136,6 +158,33 @@ defmodule IndacoinTest do
 
       Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, "#{prebacked_response}"))
       assert {:ok, prebacked_response} == Indacoin.transaction_price(transaction_price_fixture())
+    end
+  end
+
+  describe "create_transaction/1" do
+    test "with valid params returns an ID of a drafted transaction", %{bypass: bypass} do
+      prebacked_response = 12345
+
+      Bypass.expect(bypass, &Plug.Conn.send_resp(&1, 200, "#{prebacked_response}"))
+      assert {:ok, prebacked_response} == Indacoin.create_transaction(transaction_fixture())
+    end
+
+    test "with any missing request param returns an error" do
+      error_message = "Following request params must be provided: user_id, cur_in, cur_out, target_address, amount_in"
+
+      assert {:error, message} = Indacoin.create_transaction(transaction_fixture(%{"cur_out" => ""}))
+
+      assert message == error_message
+    end
+  end
+
+  describe "transaction_link/1" do
+    test "returns a signed link (with API secret key) that forwards a user to the payment form", %{bypass: bypass} do
+      url =
+        "http://localhost:#{bypass.port}/gw/payment_form?transaction_id=12345&partner=partner&" <>
+          "cnfhash=MTViTXZ3d1UybXNTRkNDdWpxTHE3NFJLSmk2dE1vOEllRjIvNCtZTmxuWT0%3D"
+
+      assert url == Indacoin.transaction_link(12345)
     end
   end
 end

@@ -332,8 +332,7 @@ defmodule Indacoin do
   def secret_key,
     do: Application.fetch_env!(:indacoin, :secret_key)
 
-  defp construct_signature() do
-    nonce = Enum.random(100_000..1_000_000)
+  def construct_signature(nonce \\ Enum.random(100_000..1_000_000)) do
     message = "#{partner_name()}_#{nonce}"
     %{nonce: nonce, value: sign(message)}
   end

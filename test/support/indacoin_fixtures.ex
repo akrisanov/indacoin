@@ -56,7 +56,7 @@ defmodule IndacoinFixtures do
     })
   end
 
-  def indacoin_active_and_disabled_coins_fixture() do
+  def active_and_disabled_coins_fixture() do
     [
       eth_fixture(),
       bch_fixture(),
@@ -95,6 +95,17 @@ defmodule IndacoinFixtures do
       "amount" => 50.0,
       "partner" => "elixir",
       "user_id" => "test@example.com"
+    })
+  end
+
+  def transaction_fixture(attrs \\ %{}) do
+    attrs
+    |> Enum.into(%{
+      "user_id" => "test@example.com",
+      "cur_in" => "USD",
+      "cur_out" => "BTC",
+      "target_address" => "1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1",
+      "amount_in" => 50.0
     })
   end
 end
