@@ -71,10 +71,10 @@ defmodule Indacoin do
     - _cur_to_ :: string
     - _amount_ :: decimal
     - _address_ :: string
+    - _partner_ :: string
 
   Optional request params:
 
-    - _partner_ :: string
     - _user_id_ :: string
   """
   def forwarding_link(params) do
@@ -83,10 +83,10 @@ defmodule Indacoin do
       cur_to
       amount
       address
+      partner
     )
 
     optional_params = ~w(
-      partner
       user_id
     )
 
@@ -359,20 +359,15 @@ defmodule Indacoin do
   # NOTE: Indacoin can be really slow... we have to specify big timeout value
   defp do_request(method, url, body \\ "", headers \\ [], recv_timeout \\ 20_000) do
     headers = Enum.into(headers, [{"Content-Type", "application/json"}])
+    request = HTTPoison.request(method, url, body, headers, recv_timeout: recv_timeout)
 
-    case HTTPoison.request(method, url, body, headers, recv_timeout: recv_timeout) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        case Jason.decode(body) do
-          {:ok, decoded} ->
-            cond do
-              is_bitstring(decoded) -> {:error, decoded}
-              true -> {:ok, decoded}
-            end
-
-          {:error, error} ->
-            {:error, error}
-        end
-
+    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- request,
+         {:ok, decoded} <- Jason.decode(body) do
+      cond do
+        is_bitstring(decoded) -> {:error, decoded}
+        true -> {:ok, decoded}
+      end
+    else
       {:ok, %HTTPoison.Response{status_code: status_code}} ->
         {:error, status_code}
 

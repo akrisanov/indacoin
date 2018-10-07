@@ -98,7 +98,7 @@ defmodule IndacoinTest do
   end
 
   describe "forwarding_link/1" do
-    @error_message "Following request params must be provided: cur_from, cur_to, amount, address"
+    @error_message "Following request params must be provided: cur_from, cur_to, amount, address, partner"
 
     test "with empty request params returns an error" do
       assert {:error, message} = Indacoin.forwarding_link(forwarding_link_empty_fixture())
@@ -121,11 +121,11 @@ defmodule IndacoinTest do
     end
 
     test "without optional params returns shorter payment url", %{bypass: bypass} do
-      assert {:ok, url} = Indacoin.forwarding_link(forwarding_link_valid_fixture(%{"partner" => nil, "user_id" => ""}))
+      assert {:ok, url} = Indacoin.forwarding_link(forwarding_link_valid_fixture(%{"user_id" => ""}))
 
       assert url ==
                "http://localhost:#{bypass.port}/gw/payment_form?" <>
-                 "address=1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1&" <> "amount=59.99&cur_from=USD&cur_to=BTC"
+                 "address=1J4hxz5vDTeBvZcb6BqLJugKbeEvMihrr1&" <> "amount=59.99&cur_from=USD&cur_to=BTC&partner=elixir"
     end
   end
 
