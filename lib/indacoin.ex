@@ -358,7 +358,7 @@ defmodule Indacoin do
 
   # NOTE: Indacoin can be really slow... we have to specify big timeout value
   defp do_request(method, url, body \\ "", headers \\ [], recv_timeout \\ 20_000) do
-    headers = Enum.into(headers, [{"Content-Type", "application/json"}])
+    headers = headers ++ [{"Content-Type", "application/json"}]
     request = HTTPoison.request(method, url, body, headers, recv_timeout: recv_timeout)
 
     with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- request,
