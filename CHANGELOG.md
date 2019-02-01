@@ -2,7 +2,7 @@
 
 ## v 1.0.2 (Jan 01, 2019)
 
-* Create a callback signature from Indacoin.
+* Add a function that generates a callback signature.
 
 ## v1 1.0.1 (Oct 08, 2018)
 

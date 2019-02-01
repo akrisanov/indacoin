@@ -309,11 +309,11 @@ defmodule Indacoin do
   end
 
   @doc """
-  Create a callback signature from Indacoin.
+  Generates a callback signature for incoming Indacoin requests.
 
   ## params
 
-  Required request params:
+  Required params:
 
     - _indacoin_nonce_ :: integer
     - _user_id_ :: string
