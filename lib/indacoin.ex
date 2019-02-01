@@ -305,13 +305,25 @@ defmodule Indacoin do
     - _tx_id_ :: integer
   """
   def valid_callback_signature?(indacoin_signature, indacoin_nonce, user_id, tx_id) do
-    new_signature =
-      "#{partner_name()}_#{user_id}_#{indacoin_nonce}_#{tx_id}"
-      |> sign()
-      |> Base.encode64()
-      |> to_string()
+    callback_signature(indacoin_nonce, user_id, tx_id) == to_string(indacoin_signature)
+  end
 
-    new_signature == to_string(indacoin_signature)
+  @doc """
+  Create a callback signature from Indacoin.
+
+  ## params
+
+  Required request params:
+
+    - _indacoin_nonce_ :: integer
+    - _user_id_ :: string
+    - _tx_id_ :: integer
+  """
+  def callback_signature(indacoin_nonce, user_id, tx_id) do
+    "#{partner_name()}_#{user_id}_#{indacoin_nonce}_#{tx_id}"
+    |> sign()
+    |> Base.encode64()
+    |> to_string()
   end
 
   @doc """
