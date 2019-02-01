@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v 1.0.2 (Jan 01, 2019)
+
+* Create a callback signature from Indacoin.
+
 ## v1 1.0.1 (Oct 08, 2018)
 
 * Mark `partner` as required param for `forwarding_link` method;

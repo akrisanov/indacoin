@@ -8,7 +8,7 @@ defmodule Indacoin.MixProject do
   def project do
     [
       app: :indacoin,
-      version: "1.0.1",
+      version: "1.0.2",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
